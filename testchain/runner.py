@@ -87,9 +87,14 @@ class Runner(object):
         """
         Kills the bitcoind process
         """
-        self.proc.terminate()
         self.log.info("Waiting 5 seconds for node to quit")
-        sleep(5)
+        self.proc.terminate()
+        try:
+            self.proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            self.log.warning("node did not quit in time; killing it")
+            self.proc.kill()
+            self.proc.wait()
 
     def next_timestamp(self):
         self.current_time += 600
